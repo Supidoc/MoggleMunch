@@ -7,4 +7,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NLog" Version="6.0.6" />
+      <PackageReference Include="Spectre.Console" Version="0.53.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\GpioHat\GpioHat.csproj" />
+    </ItemGroup>
+
 </Project>

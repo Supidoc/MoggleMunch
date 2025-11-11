@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoggleMunch", "MoggleMunch\MoggleMunch.csproj", "{BF8EE706-BE5D-474A-9538-4B2E86D81EE8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpioHat", "GpioHat\GpioHat.csproj", "{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{BF8EE706-BE5D-474A-9538-4B2E86D81EE8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF8EE706-BE5D-474A-9538-4B2E86D81EE8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BF8EE706-BE5D-474A-9538-4B2E86D81EE8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
