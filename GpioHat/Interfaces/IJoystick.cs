@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GpioHat.Enums;
 
-namespace GpioHat
+namespace GpioHat;
+
+public interface IJoystick
 {
-    public interface IJoystick
-    {
-        JoystickButtons State { get; }
-    }
+    JoystickButtons State { get; }
 }

@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoggleMunch", "MoggleMunch\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GpioHat", "GpioHat\GpioHat.csproj", "{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MoggleEngine", "MoggleEngine\MoggleEngine.csproj", "{3345BF1A-6C99-433A-AE64-B858C8861103}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0AFE5EE6-1449-4F4D-BA38-22D3B1539C5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3345BF1A-6C99-433A-AE64-B858C8861103}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3345BF1A-6C99-433A-AE64-B858C8861103}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3345BF1A-6C99-433A-AE64-B858C8861103}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3345BF1A-6C99-433A-AE64-B858C8861103}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

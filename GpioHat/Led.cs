@@ -1,10 +1,11 @@
-using System.Device.Gpio;
+using GpioHat.Enums;
 
 namespace GpioHat;
 
-public abstract class Led: ILed
+public abstract class Led : ILed
 {
-    protected int pinNumber = 0;
+    protected int pinNumber;
+
     protected Led(LedColor color)
     {
         switch (color)
@@ -19,16 +20,17 @@ public abstract class Led: ILed
                 this.pinNumber = 21;
                 break;
         }
-        
-        LedColor = color;
+
+        this.LedColor = color;
     }
-    
+
 
     public abstract bool Enabled { get; set; }
+
     public virtual bool Toggle()
     {
-        Enabled = !Enabled;
-        return Enabled;
+        this.Enabled = !this.Enabled;
+        return this.Enabled;
     }
 
     public virtual LedColor LedColor { get; }

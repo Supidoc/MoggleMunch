@@ -1,29 +1,32 @@
 using System.Numerics;
+using MoggleEngine.Input;
+using MoggleEngine.Interfaces;
 using Spectre.Console;
 
-namespace MoggleMunch.Engine;
+namespace MoggleEngine;
 
 public class GameEngine
 {
-    private readonly RenderEngine renderEngine;
-    private readonly Thread renderThread;
-    private readonly Thread updateThread;
+    public static GameEngine Instance = new();
+
     private readonly List<IRenderable> renderables = new();
+    private readonly Thread renderThread;
 
     private readonly List<IUpdatable> updatables = new();
+    private readonly Thread updateThread;
 
-    public GameEngine(int height, int width, int pixelWidth, int targetFramerate, int targetUpdaterate)
+    private GameEngine()
     {
-        this.TargetFramerate = targetFramerate;
-        this.TargetUpdaterate = targetUpdaterate;
-        this.renderEngine = new RenderEngine(height, width, pixelWidth, new Vector2(height, width));
+        this.RenderEngine = RenderEngine.Instance;
         this.updateThread = new Thread(UpdateLoop);
         this.renderThread = new Thread(RenderLoop);
-        this.renderThread.Start();
-        this.updateThread.Start();
     }
 
-    public int TargetFramerate { get; }
+    public RenderEngine RenderEngine { get; private set; }
+
+    public GuiEngine Gui { get; } = GuiEngine.Instance;
+
+    public int TargetFramerate { get; private set; }
 
     public int Framerate { get; private set; }
 
@@ -31,11 +34,22 @@ public class GameEngine
 
     public bool Running { get; set; } = true;
 
-    public int TargetUpdaterate { get; }
+    public int TargetUpdaterate { get; private set; }
 
     public float DeltaTime { get; private set; }
 
     public int UpdateRate { get; set; }
+
+    public void Init(int height, int width, int pixelWidth, int targetFramerate, int targetUpdaterate)
+    {
+        this.TargetFramerate = targetFramerate;
+        this.TargetUpdaterate = targetUpdaterate;
+        this.Gui.SetViewportHeight(height);
+        this.RenderEngine.Init(height, width, pixelWidth, new Vector2(width, height));
+
+        this.renderThread.Start();
+        this.updateThread.Start();
+    }
 
     public void RegisterUpdatable(IUpdatable updatable)
     {
@@ -58,7 +72,7 @@ public class GameEngine
         int frameCounter = 0;
 
 
-        AnsiConsole.Live(this.renderEngine.Canvas).Start(ctx =>
+        AnsiConsole.Live(this.RenderEngine.Canvas).Start(ctx =>
         {
             while (this.Running)
             {
@@ -67,9 +81,12 @@ public class GameEngine
                 frameCounter++;
                 frameCounter = frameCounter % sampleCount;
 
-                this.renderEngine.PreRender();
+                this.RenderEngine.PreRender();
                 Render();
-                this.renderEngine.PostRender(ctx);
+                this.RenderEngine.RenderCanvas();
+                this.Gui.UpdateViewport(this.RenderEngine.Canvas);
+                ctx.UpdateTarget(this.Gui.Layout);
+                ctx.Refresh();
 
                 float computingDuration = (float)(DateTime.UtcNow - lastTime).TotalMilliseconds;
                 int sleepDuration = (int)(uncorrectedSleepDuration - computingDuration);
@@ -105,6 +122,7 @@ public class GameEngine
             updateCounter++;
             updateCounter = updateCounter % sampleCount;
 
+            InputHandler.Instance.Update();
             Update();
 
             float computingDuration = (float)(DateTime.UtcNow - lastTime).TotalMilliseconds;
@@ -126,11 +144,11 @@ public class GameEngine
 
     public void Render()
     {
-        foreach (IRenderable renderable in this.renderables) renderable.Render(this.renderEngine);
+        foreach (IRenderable r in this.renderables.Where(r => r.Visible ).OrderBy(r => r.ZIndex)) r.Render();
     }
 
     public void Update()
     {
-        foreach (IUpdatable updatable in this.updatables) updatable.Update(this);
+        foreach (IUpdatable updatable in this.updatables) updatable.Update();
     }
 }

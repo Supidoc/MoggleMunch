@@ -1,4 +1,4 @@
-namespace GpioHat;
+namespace GpioHat.Enums;
 
 public enum LedColor
 {

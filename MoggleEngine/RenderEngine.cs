@@ -1,37 +1,38 @@
 using System.Numerics;
 using Spectre.Console;
 
-namespace MoggleMunch.Engine;
+namespace MoggleEngine;
 
 public class RenderEngine
 {
-    private Color?[,] pixels;
-    private readonly int pixelWidth;
-
-    public Vector2 CameraPos { get; set; } = new(0, 0);
+    public static RenderEngine Instance = new RenderEngine();
+    
     private Vector2 cameraSize;
+    private int pixelWidth;
+    private Color?[,] pixels = new Color?[0,0];
 
-    public RenderEngine(int height, int width, int pixelWidth, Vector2 cameraSize)
+    private RenderEngine()
     {
+    }
+    
+    public void Init(int height, int width, int pixelWidth, Vector2 cameraSize)
+    {
+        this.Height = height;
+        this.Width = width;
         this.pixelWidth = pixelWidth;
         this.cameraSize = cameraSize;
 
-        this.Canvas = new Canvas(width * pixelWidth, height);
-        this.Canvas.PixelWidth = pixelWidth;
+        this.Canvas = new Canvas(width*pixelWidth, height);
         this.pixels = new Color?[width, height];
     }
 
-    public int Height
-    {
-        get => this.Canvas.Height;
-    }
+    public Vector2 CameraPos { get; set; } = new(0, 0);
 
-    public int Width
-    {
-        get => this.Canvas.Width / this.Canvas.PixelWidth;
-    }
+    public int Height { get; set; }
 
-    public Canvas Canvas { get; private set; }
+    public int Width { get; set; }
+
+    public Canvas Canvas { get; private set; } = new Canvas(1, 1);
 
     public void DrawPixel(Vector2 pos, Color color)
     {
@@ -43,34 +44,36 @@ public class RenderEngine
         if (inView)
         {
             Vector2 viewPos = pos - this.CameraPos;
-            SetPixel((int)Math.Round(viewPos.X), (int)Math.Round(viewPos.Y), color);
+            SetPixel((int)Math.Floor(viewPos.X), (int)Math.Floor(viewPos.Y), color);
         }
     }
 
 
     private void SetPixel(int x, int y, Color color)
     {
-        this.pixels[x, y] = color;
+        if (x >= 0 && x < this.pixels.GetLength(0) && y >= 0 && y < this.pixels.GetLength(1))
+        {
+            this.pixels[x, y] = color;
+        }
     }
-    
 
-public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius = 0)
+
+    public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius = 0)
     {
-        
-        float posX = pos.X;
+        float posX = pos.X ;
         float posY = pos.Y;
 
-        float minPosX = Math.Max(posX - radius, 0);
-        float maxPosX = Math.Min(posX + radius, this.Width);
+        float minPosX = posX - radius + 0.5f;
+        float maxPosX = posX + radius + 0.5f;
 
-        float minPosY = Math.Max(posY - radius, 0);
-        float maxPosY = Math.Min(posY + radius, this.Height);
+        float minPosY = posY - radius+0.5f;
+        float maxPosY = posY + radius+0.5f;
 
         for (float i = minPosX; i <= maxPosX; i++)
         for (float j = minPosY; j <= maxPosY; j++)
-            if (Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) <= Math.Pow(radius+0.001, 2) &&
-                Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) >= Math.Pow(innerRadius+0.001, 2))
-                DrawPixel(new Vector2(i,j), color);
+            if (Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) <= Math.Pow(radius + 0.001, 2) &&
+                Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) >= Math.Pow(innerRadius + 0.001, 2))
+                DrawPixel(new Vector2(i, j), color);
     }
 
     public void DrawLine(Vector2 pos0, Vector2 pos1, Color color)
@@ -98,7 +101,7 @@ public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius =
 
             for (float x = x0; x < x1; x++)
             {
-                DrawPixel(new Vector2(x,y), color);
+                DrawPixel(new Vector2(x, y), color);
                 if (d > 0)
                 {
                     y += yi;
@@ -122,7 +125,7 @@ public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius =
             float x = x0;
             for (float y = y0; y < y1; y++)
             {
-                DrawPixel(new Vector2(x,y), color);
+                DrawPixel(new Vector2(x, y), color);
                 if (d > 0)
                 {
                     x += xi;
@@ -136,22 +139,16 @@ public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius =
 
     public void PreRender()
     {
-
         this.pixels = new Color?[this.Width, this.Height];
-
     }
 
-    public void PostRender(LiveDisplayContext ctx)
+    public void RenderCanvas()
     {
-        this.Canvas = new Canvas(this.Canvas.Width, this.Canvas.Height);
+        this.Canvas = new Canvas(this.Width, this.Height);
         this.Canvas.PixelWidth = this.pixelWidth;
-        
         for (int i = 0; i < this.pixels.GetLength(0); i++)
-        for (int j = 0; j < this.pixels.GetLength(1); j++)
-            if (this.pixels[i, j].HasValue)
-                this.Canvas.SetPixel(i, j, this.pixels[i, j]!.Value);
-        ctx.UpdateTarget(this.Canvas);
-        ctx.Refresh();
-        
+        for (int j = 0; j < this.pixels.GetLength(1) ; j++)
+            if (this.pixels[i, j].HasValue) 
+                this.Canvas.SetPixel(i, this.Height- j -1, this.pixels[i, j]!.Value);
     }
 }
