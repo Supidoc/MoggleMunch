@@ -3,18 +3,48 @@ using Spectre.Console;
 
 namespace MoggleEngine;
 
+/// <summary>
+/// Engine responsible for rasterizing pixels and simple shapes into a Spectre.Console <see cref="Canvas"/>.
+/// Provides a singleton instance and camera controls used by game levels and objects to draw to the viewport.
+/// </summary>
 public class RenderEngine
 {
-    public static RenderEngine Instance = new RenderEngine();
-    
+    /// <summary>
+    /// Singleton instance of the render engine.
+    /// </summary>
+    public static RenderEngine Instance = new();
+
     private Vector2 cameraSize;
+    private Color?[,] pixels = new Color?[0, 0];
     private int pixelWidth;
-    private Color?[,] pixels = new Color?[0,0];
 
     private RenderEngine()
     {
     }
-    
+
+    /// <summary>
+    /// Position of the camera (bottom-left) in world coordinates.
+    /// </summary>
+    public Vector2 CameraPos { get; set; } = new(0, 0);
+
+    /// <summary>
+    /// Height of the viewport in pixels.
+    /// </summary>
+    public int Height { get; set; }
+
+    /// <summary>
+    /// Width of the viewport in pixels.
+    /// </summary>
+    public int Width { get; set; }
+
+    /// <summary>
+    /// The Spectre.Console <see cref="Canvas"/> that is produced by this render engine when rendering.
+    /// </summary>
+    public Canvas Canvas { get; private set; } = new(1, 1);
+
+    /// <summary>
+    /// Initializes the render engine with the given viewport size and pixel scaling.
+    /// </summary>
     public void Init(int height, int width, int pixelWidth, Vector2 cameraSize)
     {
         this.Height = height;
@@ -22,18 +52,15 @@ public class RenderEngine
         this.pixelWidth = pixelWidth;
         this.cameraSize = cameraSize;
 
-        this.Canvas = new Canvas(width*pixelWidth, height);
+        this.Canvas = new Canvas(width * pixelWidth, height);
         this.pixels = new Color?[width, height];
     }
 
-    public Vector2 CameraPos { get; set; } = new(0, 0);
-
-    public int Height { get; set; }
-
-    public int Width { get; set; }
-
-    public Canvas Canvas { get; private set; } = new Canvas(1, 1);
-
+    /// <summary>
+    /// Attempts to set a pixel at the specified world position to the provided color if it is inside the camera view.
+    /// </summary>
+    /// <param name="pos">World position to draw the pixel at.</param>
+    /// <param name="color">Spectre.Console color to use for the pixel.</param>
     public void DrawPixel(Vector2 pos, Color color)
     {
         bool inView = true;
@@ -51,31 +78,16 @@ public class RenderEngine
 
     private void SetPixel(int x, int y, Color color)
     {
-        if (x >= 0 && x < this.pixels.GetLength(0) && y >= 0 && y < this.pixels.GetLength(1))
-        {
-            this.pixels[x, y] = color;
-        }
+        if (x >= 0 && x < this.pixels.GetLength(0) && y >= 0 && y < this.pixels.GetLength(1)) this.pixels[x, y] = color;
     }
 
 
-    public void DrawCircle(Vector2 pos, float radius, Color color, int innerRadius = 0)
-    {
-        float posX = pos.X ;
-        float posY = pos.Y;
-
-        float minPosX = posX - radius + 0.5f;
-        float maxPosX = posX + radius + 0.5f;
-
-        float minPosY = posY - radius+0.5f;
-        float maxPosY = posY + radius+0.5f;
-
-        for (float i = minPosX; i <= maxPosX; i++)
-        for (float j = minPosY; j <= maxPosY; j++)
-            if (Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) <= Math.Pow(radius + 0.001, 2) &&
-                Math.Pow(i - posX, 2) + Math.Pow(j - posY, 2) >= Math.Pow(innerRadius + 0.001, 2))
-                DrawPixel(new Vector2(i, j), color);
-    }
-
+    /// <summary>
+    /// Draws a straight line between two world-space points using a simple raster algorithm.
+    /// </summary>
+    /// <param name="pos0">Start position.</param>
+    /// <param name="pos1">End position.</param>
+    /// <param name="color">Color used to draw the line.</param>
     public void DrawLine(Vector2 pos0, Vector2 pos1, Color color)
     {
         float x0 = pos0.X;
@@ -137,18 +149,94 @@ public class RenderEngine
         }
     }
 
-    public void PreRender()
+
+    /// <summary>
+    /// Draws a circle outline using the midpoint circle algorithm at the given world-space center.
+    /// </summary>
+    /// <param name="pos">Center of the circle.</param>
+    /// <param name="outerRadius">Outer radius in world units.</param>
+    /// <param name="color">Color used for the circle pixels.</param>
+    /// <param name="innerRadius">Optional inner radius for ring shapes (not currently used by the algorithm here).</param>
+    /// <remarks>Copied from www.geeksforgeeks.org/dsa/mid-point-circle-drawing-algorithm/</remarks>
+    public void DrawCircle(Vector2 pos, float outerRadius, Color color, float innerRadius = 0)
     {
-        this.pixels = new Color?[this.Width, this.Height];
+        int xCentre = (int)Math.Round(pos.X);
+        int yCentre = (int)Math.Round(pos.Y);
+        int r = (int)Math.Round(outerRadius);
+
+        int x = r;
+        int y = 0;
+
+        // Printing the initial point on the
+        // axes after translation
+        DrawPixel(new Vector2(x + xCentre, yCentre), color);
+
+        // When radius is zero only a single
+        // point will be printed
+        if (r > 0)
+        {
+            DrawPixel(new Vector2(-x + xCentre, -y + yCentre), color);
+            DrawPixel(new Vector2(y + xCentre, x + yCentre), color);
+            DrawPixel(new Vector2(-y + xCentre, -x + yCentre), color);
+        }
+
+        // Initialising the value of P
+        int P = 1 - r;
+        while (x > y)
+        {
+            y++;
+
+            // Mid-point is inside or on the perimeter
+            if (P <= 0)
+            {
+                P = P + 2 * y + 1;
+            }
+
+            // Mid-point is outside the perimeter
+            else
+            {
+                x--;
+                P = P + 2 * y - 2 * x + 1;
+            }
+
+            // All the perimeter points have already 
+            // been printed
+            if (x < y)
+                break;
+
+            // Printing the generated point and its 
+            // reflection in the other octants after
+            // translation
+            DrawPixel(new Vector2(x + xCentre, y + yCentre), color);
+            DrawPixel(new Vector2(-x + xCentre, y + yCentre), color);
+            DrawPixel(new Vector2(x + xCentre, -y + yCentre), color);
+            DrawPixel(new Vector2(-x + xCentre, -y + yCentre), color);
+
+            // If the generated point is on the 
+            // line x = y then the perimeter points
+            // have already been printed
+            if (x != y)
+            {
+                DrawPixel(new Vector2(y + xCentre, x + yCentre), color);
+                DrawPixel(new Vector2(-y + xCentre, x + yCentre), color);
+                DrawPixel(new Vector2(y + xCentre, -x + yCentre), color);
+                DrawPixel(new Vector2(-y + xCentre, -x + yCentre), color);
+            }
+        }
     }
 
+
+    /// <summary>
+    /// Transfers the internal pixel buffer to the <see cref="Canvas"/> instance and resets the buffer for the next frame.
+    /// </summary>
     public void RenderCanvas()
     {
         this.Canvas = new Canvas(this.Width, this.Height);
         this.Canvas.PixelWidth = this.pixelWidth;
         for (int i = 0; i < this.pixels.GetLength(0); i++)
-        for (int j = 0; j < this.pixels.GetLength(1) ; j++)
-            if (this.pixels[i, j].HasValue) 
-                this.Canvas.SetPixel(i, this.Height- j -1, this.pixels[i, j]!.Value);
+        for (int j = 0; j < this.pixels.GetLength(1); j++)
+            if (this.pixels[i, j].HasValue)
+                this.Canvas.SetPixel(i, this.Height - j - 1, this.pixels[i, j]!.Value); //Render with 0,0 at bottom left
+        this.pixels = new Color?[this.Width, this.Height];
     }
 }

@@ -11,12 +11,12 @@ public enum HardwareAccess
 
 public class Raspberry
 {
-    public static Raspberry Instance { get; } = new Raspberry();
-
     private Raspberry()
     {
     }
-    
+
+    public static Raspberry Instance { get; } = new();
+
     public IJoystick? Joystick { get; private set; }
 
     public ILed? RedLed { get; private set; }
@@ -45,7 +45,6 @@ public class Raspberry
         {
             GpioController gpio = new();
             return true;
-
         }
         catch (Exception e)
         {
