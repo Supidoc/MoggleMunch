@@ -8,13 +8,13 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="NLog" Version="6.0.6"/>
-        <PackageReference Include="Spectre.Console" Version="0.54.0"/>
+        <PackageReference Include="NLog" Version="6.0.6" />
+        <PackageReference Include="Spectre.Console" Version="0.54.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\MoggleEngine\MoggleEngine.csproj"/>
-        <ProjectReference Include="..\GpioHat\GpioHat.csproj"/>
+        <ProjectReference Include="..\MoggleEngine\MoggleEngine.csproj" />
+        <ProjectReference Include="..\GpioHat\GpioHat.csproj" />
     </ItemGroup>
 
 </Project>

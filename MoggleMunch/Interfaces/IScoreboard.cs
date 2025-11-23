@@ -1,4 +1,4 @@
-namespace MoggleMunch;
+namespace MoggleMunch.Interfaces;
 
 /// <summary>
 /// Interface for a simple scoreboard store used by the menu system.
@@ -8,10 +8,15 @@ public interface IScoreboard
     /// <summary>
     /// Record a score for a player.
     /// </summary>
-    public void SetScore(string playername, int score);
+    public void SetScore(string playerName, int score, int timeStamp);
 
     /// <summary>
     /// Retrieve the current scoreboard entries as a mapping of player name to score.
     /// </summary>
-    public Dictionary<string, int> GetScoreboard();
+    public List<ScoreBoardData> GetScoreboard();
+
+    /// <summary>
+    /// Gets a list of the top ten scores from the scoreboard.
+    /// </summary>
+    public List<ScoreBoardData> GetTopTen { get; }
 }
