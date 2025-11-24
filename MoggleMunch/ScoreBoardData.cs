@@ -10,7 +10,7 @@ namespace MoggleMunch
     {
         public string PlayerName { get; set; } = string.Empty;
         public int Score { get; set;}
-        public int TimeStamp { get; set; }
+        public DateTime TimeStamp { get; set; }
 
         public override string ToString()
         {

@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Numerics;
 using MoggleEngine;
 using MoggleMunch.Inputs;
@@ -14,6 +15,8 @@ public class Player : GameObject
     private readonly MainGameLevel level;
     private Vector2 inputForce = Vector2.Zero;
 
+    public const int NeeededFood = 40;
+    
     private int radius = 1;
 
     public Player(MainGameLevel level)
@@ -77,10 +80,16 @@ public class Player : GameObject
     public override void Update()
     {
         UpdatePhysics();
-        this.level.StatusBar.GuiItems["X:"] = this.Position.X.ToString("0.00");
-        this.level.StatusBar.GuiItems["Y:"] = this.Position.Y.ToString("0.00");
-        this.level.StatusBar.GuiItems["Food:"] = this.FoodLevel.ToString();
+        Vector2 min = -this.level.WorldSize/2f;
+        Vector2 max = this.level.WorldSize/2f;
         
+        this.Position = new Vector2(Math.Clamp(this.Position.X, min.X, max.X), Math.Clamp(this.Position.Y, min.Y, max.Y));
+        if (Debugger.IsAttached)
+        {
+            this.level.StatusBar.GuiItems["X:"] = this.Position.X.ToString("0.00");
+            this.level.StatusBar.GuiItems["Y:"] = this.Position.Y.ToString("0.00");
+            this.level.StatusBar.GuiItems["Food:"] = this.FoodLevel.ToString();
+        }
 
         GameEngine.Instance.RenderEngine.CameraPos = this.Position -
                                                      0.5f * new Vector2(GameEngine.Instance.RenderEngine.Width,
@@ -96,7 +105,7 @@ public class Player : GameObject
                 if (this.FoodLevel % 10 == 0) this.radius++;
             }
 
-        if (this.FoodLevel > 39) this.level.EndGame();
+        if (this.FoodLevel > NeeededFood) this.level.EndGame();
     }
 
     private void OnPlayerStarted(object? sender, EventArgs eventArgs)

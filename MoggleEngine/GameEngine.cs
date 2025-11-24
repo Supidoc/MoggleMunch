@@ -110,7 +110,7 @@ public class GameEngine
 
                 frameCounter++;
                 frameCounter = frameCounter % sampleCount;
-
+                
                 this.Level.Render();
                 ctx.UpdateTarget(this.Level.UiRenderable);
                 ctx.Refresh();

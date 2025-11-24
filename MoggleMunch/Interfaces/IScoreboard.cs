@@ -8,7 +8,7 @@ public interface IScoreboard
     /// <summary>
     /// Record a score for a player.
     /// </summary>
-    public void SetScore(string playerName, int score, int timeStamp);
+    public void SetScore(int score, DateTime timeStamp);
 
     /// <summary>
     /// Retrieve the current scoreboard entries as a mapping of player name to score.

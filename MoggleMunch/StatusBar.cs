@@ -1,3 +1,4 @@
+using MoggleEngine;
 using Spectre.Console;
 using Spectre.Console.Rendering;
 
@@ -8,6 +9,11 @@ namespace MoggleMunch;
 /// </summary>
 public class StatusBar
 {
+    public float Progress = 0.0f;
+
+    public int Score = 0;
+
+    
     private Grid grid;
 
     public Dictionary<string, string> GuiItems = new();
@@ -16,8 +22,9 @@ public class StatusBar
 
     public StatusBar()
     {
-        this.layout = new Layout("root").SplitColumns(new Layout("progress"),
-            new Layout("playerinfo"));
+        this.layout = new Layout("root").SplitColumns(new Layout("left"),
+            new Layout("right"));
+        this.layout["right"].SplitColumns(new Layout("score"),new Layout("playerinfo"));
         this.grid = new Grid();
     }
 
@@ -26,7 +33,7 @@ public class StatusBar
     /// </summary>
     public IRenderable Renderable
     {
-        get => this.grid;
+        get => this.layout;
     }
 
     /// <summary>
@@ -39,6 +46,9 @@ public class StatusBar
     /// </summary>
     public void Render()
     {
+        GameEngine.Instance.RenderEngine.distanceFromEdgeTop = Math.Max(this.GuiItems.Count + 4, 5);
+        GameEngine.Instance.RenderEngine.distanceFromEdgeLeft = 5;
+        
         this.grid = new Grid();
 
         this.grid.Expand();
@@ -46,10 +56,21 @@ public class StatusBar
         this.grid.AddColumn();
 
         foreach (KeyValuePair<string, string> item in this.GuiItems)
-            this.grid.AddRow(new Text(item.Key, new Style(Color.Black)).LeftJustified(),
-                new Text(item.Value, new Style(Color.Black)).LeftJustified());
-    }
+            this.grid.AddRow(new Text(item.Key, new Style(Color.NavajoWhite1)).RightJustified(),
+                new Text(item.Value, new Style(Color.LightCyan1 )).RightJustified());
+        
+        this.layout["right"]["playerinfo"].Update(Align.Right(this.grid));
+        this.layout["right"]["score"].Update(
+            Align.Right(
+                new Markup($"[yellow]Score:[/] [green]{this.Score}[/]").RightJustified()));
+        this.layout["left"].Update(
+            new BreakdownChart().Expand().AddItem(string.Empty, this.Progress, Color.Green1)
+                .AddItem(string.Empty, 100.0f - this.Progress, Color.Gray)
+                .HideTags());
+    }   
 
+    
+    
     /// <summary>
     /// Optional initialization hook.
     /// </summary>

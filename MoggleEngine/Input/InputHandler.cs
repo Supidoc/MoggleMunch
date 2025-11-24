@@ -9,6 +9,9 @@ namespace MoggleEngine.Input;
 public class InputHandler
 {
     private readonly List<IUpdatableInput> inputs = new();
+    
+    private readonly object inputsLock = new();
+
 
     private InputHandler()
     {
@@ -24,7 +27,16 @@ public class InputHandler
     /// </summary>
     public void Update()
     {
-        foreach (IUpdatableInput input in this.inputs.ToList()) input.Update();
+        List<IUpdatableInput> snapshot;
+        lock (this.inputsLock)
+        {
+            // Make a stable copy while holding the lock
+            snapshot = new List<IUpdatableInput>(this.inputs);
+        }
+
+        // Iterate the snapshot outside the lock to avoid blocking registrations
+        foreach (IUpdatableInput input in snapshot) input.Update();
+
         ConsoleInputHandler.Update();
     }
 

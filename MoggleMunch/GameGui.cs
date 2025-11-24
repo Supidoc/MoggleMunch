@@ -46,8 +46,12 @@ public class GameGui : IGameGui
     /// </summary>
     public void SetViewportHeight(int viewportHeight)
     {
-        //this.layout["gui"].Size(5);
         this.layout["viewport"].Size(viewportHeight);
+    }
+    
+    public void SetGuiHeight(int guiHeight)
+    {
+        this.layout["gui"].Size(guiHeight);
     }
 
     /// <summary>

@@ -21,6 +21,11 @@ public class RenderEngine
     private RenderEngine()
     {
     }
+    
+    public int distanceFromEdgeLeft  { get; set; } = 0;
+    public int distanceFromEdgeRight { get; set; } = 0;
+    public int distanceFromEdgeTop   { get; set; } = 0;
+    public int distanceFromEdgeBottom{ get; set; } = 0;
 
     /// <summary>
     /// Position of the camera (bottom-left) in world coordinates.
@@ -52,7 +57,7 @@ public class RenderEngine
         this.pixelWidth = pixelWidth;
         this.cameraSize = cameraSize;
 
-        this.Canvas = new Canvas(width * pixelWidth, height);
+        this.Canvas = new Canvas(width, height);
         this.pixels = new Color?[width, height];
     }
 
@@ -231,12 +236,48 @@ public class RenderEngine
     /// </summary>
     public void RenderCanvas()
     {
+        // Compute desired canvas width from console first
+        int w = Console.WindowWidth;
+        int h = Console.WindowHeight;
+        int widthOffset = this.distanceFromEdgeLeft + this.distanceFromEdgeRight;
+        int heightOffset = this.distanceFromEdgeTop + this.distanceFromEdgeBottom;
+        int desiredWidth = Math.Max(1, (w - widthOffset) / this.pixelWidth);
+        int desiredHeight = Math.Max(1, (h - heightOffset));
+
+        // If width changed, resize buffer before rendering (preserve existing pixels where possible)
+        if (desiredWidth != this.Width || desiredHeight != this.Height)
+        {
+            var newPixels = new Color?[desiredWidth, desiredHeight];
+            int copyW = Math.Min(desiredWidth, this.pixels.GetLength(0));
+            int copyH = Math.Min(desiredHeight, this.pixels.GetLength(1));
+            for (int i = 0; i < copyW; i++)
+            for (int j = 0; j < copyH; j++)
+                newPixels[i, j] = this.pixels[i, j];
+
+            this.pixels = newPixels;
+            this.Width = desiredWidth;
+            this.Height = desiredHeight;
+            this.cameraSize = new Vector2(this.Width, this.Height);
+        }
+
+        // Build canvas using the stable current dimensions
         this.Canvas = new Canvas(this.Width, this.Height);
         this.Canvas.PixelWidth = this.pixelWidth;
+
+        // Copy pixel buffer to canvas (render with 0,0 at bottom-left)
+        for (int i = 0; i < this.pixels.GetLength(0); i++)
+        {
+            for (int j = 0; j < this.pixels.GetLength(1); j++)
+            {
+                if (this.pixels[i, j].HasValue)
+                    this.Canvas.SetPixel(i, this.Height - j - 1, this.pixels[i, j]!.Value);
+            }
+        }
+
+        // Clear buffer for next frame without reallocating (prevents tearing/flicker)
         for (int i = 0; i < this.pixels.GetLength(0); i++)
         for (int j = 0; j < this.pixels.GetLength(1); j++)
-            if (this.pixels[i, j].HasValue)
-                this.Canvas.SetPixel(i, this.Height - j - 1, this.pixels[i, j]!.Value); //Render with 0,0 at bottom left
-        this.pixels = new Color?[this.Width, this.Height];
+            this.pixels[i, j] = null;
     }
+
 }

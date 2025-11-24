@@ -14,20 +14,25 @@ public class MainGameLevel : GameLevel
     public int LastScore;
 
     private DateTime startTime;
-    public Vector2 WorldSize = new(100, 100);
+    public Vector2 WorldSize = new(300, 300);
+    
+    private const int FoodCount = 600;
+
+    private Player player;
 
     public MainGameLevel()
     {
         this.GameGui = new GameGui();
-        this.GameGui.SetViewportHeight(25);
         this.StatusBar = new StatusBar();
 
         Player player = new(this);
         TestDrawings testDrawings = new();
+        
+        this.player = player;
 
         AddGameObject(player);
         AddGameObject(testDrawings);
-        for (int i = 0; i < 100; i++)
+        for (int i = 0; i < FoodCount; i++)
             SpawnFood();
     }
 
@@ -58,25 +63,41 @@ public class MainGameLevel : GameLevel
         {
             this.GameRunning = false;
             TimeSpan gameTime = DateTime.Now - this.startTime;
-            this.LastScore = (int)(100 / gameTime.TotalSeconds);
+            this.LastScore = CalculateScore();
             OnGameEnded();
         }
     }
+    
+private int CalculateScore()
+{
+    double elapsed = (DateTime.Now - this.startTime).TotalSeconds;
+    const double maxScore = 100.0;
+    const double tau = 30.0; // characteristic time in seconds before score starts dropping noticeably
+    const double k = 2.0;    // exponent > 1 => slower decrease at the beginning
+    double score = maxScore / (1.0 + Math.Pow(elapsed / tau, k));
+    return (int)Math.Max(0, score);
+}
 
     private void OnGameEnded()
     {
         GameEnded.Invoke(this, this.LastScore);
+        ScoreBoard.Instance.SetScore(this.LastScore, DateTime.Now);
     }
 
     public override void Load()
     {
         base.Load();
+        this.StatusBar.GuiItems["Player:"] = ScoreBoard.Instance.PlayerName;
     }
 
     public override void Update()
     {
         base.Update();
+        this.StatusBar.Progress = this.player.FoodLevel/(Player.NeeededFood / 100f);
+        this.StatusBar.Score = CalculateScore();
         this.GameGui.UpdateGui(this.StatusBar.Renderable);
+        this.GameGui.SetViewportHeight(GameEngine.Instance.RenderEngine.Height);
+        this.GameGui.SetGuiHeight(this.StatusBar.GuiItems.Count+2);
     }
 
     public override void Render()
