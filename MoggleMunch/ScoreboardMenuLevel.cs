@@ -73,9 +73,9 @@ public class ScoreboardMenuLevel : MenuLevel
         newScoreboard.AddColumn(new TableColumn("Time").Centered());
         newScoreboard.Centered();
 
-        foreach (ScoreBoardData score in ScoreBoard.Instance.GetTopTen)
+        foreach (ScoreBoardData score in ScoreBoard.Instance.GetTopTen.OrderByDescending(s => s.Score).ThenBy(s => s.TimeStamp))
         {
-            newScoreboard.AddRow(new string[]{score.PlayerName, score.Score.ToString(),score.TimeStamp.ToString("yyyy-MM-dd"),
+            newScoreboard.AddRow(new string[]{score.PlayerName, score.Score.ToString(),score.TimeStamp.ToString("dd.MM.yyyy"),
                 score.TimeStamp.ToString("HH:mm:ss")});
         }
         this.layout["content"]["scoreboard"].Update(newScoreboard);

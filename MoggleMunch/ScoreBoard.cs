@@ -23,7 +23,7 @@ namespace MoggleMunch
 
         private ScoreBoard(string path)
         {
-            this.path = path + fileName;
+            this.path = Path.Combine(path, this.fileName);
         }
 
         /// <summary>

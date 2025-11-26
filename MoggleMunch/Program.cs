@@ -9,6 +9,7 @@ namespace MoggleMunch;
 
 /// <summary>
 /// Application entry point. Parses command-line arguments, initializes hardware if available and starts the initial menu level.
+/// For Info on command-line arguments, see README.md.
 /// </summary>
 internal class Program
 {
@@ -24,17 +25,17 @@ internal class Program
             while (!Debugger.IsAttached) Thread.Sleep(500);
         }
 
-        string username = "Player1";
+        string playerName = "Player1";
 
 
 
-        int usernameIndex = args.ToList().FindIndex(s => s == "--username");
-        if (usernameIndex != -1) username = args[usernameIndex + 1];
+        int playerNameIndex = args.ToList().FindIndex(s => s == "--playerName");
+        if (playerNameIndex != -1) playerName = args[playerNameIndex + 1];
         
-        ScoreBoard.Instance.PlayerName = username;
+        ScoreBoard.Instance.PlayerName = playerName;
 
         
-        int pixelWidth = 1;
+        int pixelWidth = 3;
 
 
         int pixelWidthIndex = args.ToList().FindIndex(s => s == "--pixelWidth");
@@ -43,8 +44,8 @@ internal class Program
             bool parseSuccesful = int.TryParse(args[pixelWidthIndex + 1], out pixelWidth);
             if (!parseSuccesful)
             {
-                Log.Error("Could not parse pixel width argument, using default of 1");
-                pixelWidth = 1;
+                Log.Error("Could not parse pixel width argument, using default of 3");
+                pixelWidth = 3;
             }
         }
 
