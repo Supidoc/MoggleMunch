@@ -26,12 +26,10 @@ public class MainGameLevel : GameLevel
         this.StatusBar = new StatusBar();
 
         Player player = new(this);
-        TestDrawings testDrawings = new();
         
         this.player = player;
 
         AddGameObject(player);
-        AddGameObject(testDrawings);
         for (int i = 0; i < FoodCount; i++)
             SpawnFood();
     }
@@ -43,7 +41,7 @@ public class MainGameLevel : GameLevel
     /// <summary>
     /// Event raised when the game ends. The integer payload is the final score.
     /// </summary>
-    public event EventHandler<int> GameEnded;
+    public event EventHandler<int>? GameEnded;
 
     /// <summary>
     /// Starts the gameplay timer and sets the running flag.
