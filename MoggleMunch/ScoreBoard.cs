@@ -15,7 +15,7 @@ namespace MoggleMunch
     {
 
         public readonly string path;
-        public readonly string fileName = "ScoreBoard.json"; // is there a better way to do this?
+        public readonly string fileName = "ScoreBoard.json";
 
         public string PlayerName { get; set; } = string.Empty;
 
@@ -94,8 +94,7 @@ namespace MoggleMunch
             get
             {
                 List<ScoreBoardData> scoreBoard = GetScoreboard();
-                var playerScores = scoreBoard.Where(s => s.PlayerName == PlayerName);
-                List<ScoreBoardData> scoreBoardDatas = playerScores.ToList();
+                List<ScoreBoardData> scoreBoardDatas = scoreBoard.Where(s => s.PlayerName == PlayerName).ToList();
                 if (scoreBoardDatas.Any())
                 {
                     return scoreBoardDatas.Max(s => s.Score);
@@ -112,8 +111,7 @@ namespace MoggleMunch
             get
             {
                 List<ScoreBoardData> scoreBoard = GetScoreboard();
-                var playerScores = scoreBoard.Where(s => s.PlayerName == PlayerName).OrderBy(s => s.TimeStamp);
-                List<ScoreBoardData> scoreBoardDatas = playerScores.ToList();
+                List<ScoreBoardData> scoreBoardDatas = scoreBoard.Where(s => s.PlayerName == PlayerName).OrderBy(s => s.TimeStamp).ToList();
                 if (scoreBoardDatas.Any())
                 {
                     return scoreBoardDatas.Last().Score;
